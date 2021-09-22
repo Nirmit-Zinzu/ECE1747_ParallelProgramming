@@ -11,6 +11,7 @@
 #define CACHELINE_SIZE 64
 #define WORDS_PER_CACHELINE  ((CACHELINE_SIZE)/sizeof(int))
 
+
 int error(const char * msg)
 {
     perror(msg);
@@ -29,16 +30,9 @@ int transform(int a)
 
 void sequentialSolution(int *A)
 {
-    for (int n = STRIDE; n < NUM_ELEM; ++n)
+    for (int n = STRIDE; n < NUM_ELEM; ++n) {
         A[n] = transform(A[n - STRIDE]);
-}
-
-void parallelSolution(int *A)
-{
-    for (int i = 1; i < ITER; ++i)
-        #pragma omp parallel for
-        for (int n = i * STRIDE; n < (i+1) * STRIDE; ++n)
-            A[n] = transform(A[n - STRIDE]);
+    }
 }
 
 void wrongSolution(int *A)
@@ -49,7 +43,49 @@ void wrongSolution(int *A)
         A[n] = transform(A[n - STRIDE]);
 }
 
-//replace with your parallel solution here
+// Shwetha's solution
+void parallelSolution_1(int *A)
+{
+    for (int i = 1; i < ITER; ++i)
+        //  #pragma omp_set_num_threads(8);
+        #pragma omp parallel for
+        for (int n = i * STRIDE; n < (i+1) * STRIDE; ++n)
+            A[n] = transform(A[n - STRIDE]);
+}
+
+// similar to solution 1, except indexing i at 0
+void parallelSolution_2(int *A)
+{
+    for (int i = 0; i < ITER; ++i) {
+        #pragma omp parallel for 
+        for (int n = i * STRIDE; n < (i+1) * STRIDE; ++n) {
+            A[n + STRIDE] = transform(A[n]);
+        }
+    }
+}
+
+// Cache locality issue -- worse than sequential
+void parallelSolution_3(int *A)
+{
+    #pragma omp parallel for
+    for (int i = 0; i < STRIDE; i++) {
+        for (int n = 0; n < ITER; n++) {
+            A[i + (n+1)*STRIDE] = transform(A[i + n*STRIDE]);
+        }
+    }
+}
+
+// Transformation 
+void parallelSolution_4(int *A)
+{
+    #pragma omp parallel for 
+    for (int i = 1; i < ITER; ++i) {
+        int idx = i * STRIDE;
+        for (int n = 0; n < STRIDE; ++n) {
+            A[idx + n] = transform(A[n]);
+        }
+    }
+}
 
 
 
@@ -70,8 +106,14 @@ int main()
     printf("\n");
 
     start_time = getElapsedTime();
+
+    // sequentialSolution(A);
     
-    sequentialSolution(A);
+    // parallelSolution_1(A);  // Shwetha's solution
+    // parallelSolution_2(A);  // similar to solution 1, except indexing i at 0
+    // parallelSolution_3(A);  // Cache locality issue -- worse than sequential
+    parallelSolution_4(A);  // Transformation
+
     // call your parallel solution here
     end_time = getElapsedTime();
     
@@ -81,41 +123,9 @@ int main()
     printf("\n");
 
     printf("Code took %lf seconds \n", end_time - start_time);
-
-    //parallel code
-    int *B = (int*)malloc(sizeof(int) * NUM_ELEM);
-    if (!B)
-        error("cannot allocate array");
-    // Initiallize array
-    #pragma omp parallel for
-    for (int n = 0; n < NUM_ELEM; ++n)
-        B[n] = n;
-    // print values for the last 1024 block of elements
-    for (int n = 0; n < STRIDE; ++n)
-        printf("%d ", B[n + (ITER-1)*STRIDE]);
-    printf("\n");
-
-    start_time = getElapsedTime();
     
-    parallelSolution(B);
+    free(A);
     
-    end_time = getElapsedTime();
-    
-    // verify results for the last 1024 block of elements
-    for (int n = 0; n < STRIDE; ++n)
-        printf("%d ", B[n + (ITER-1)*STRIDE]);
-    printf("\n");
-
-    printf("Code took %lf seconds \n", end_time - start_time);
-    
-    for (int n = 0; n < NUM_ELEM; ++n)
-        if(A[n] != B[n]){
-            printf("Results do not match at", n);
-            break;
-        }
     return 0;
 }
 
-	
-	
-	
