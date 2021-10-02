@@ -11,7 +11,7 @@
 // Nirmit Zinzuwadia | 1002434074
 
 // to compile, run:
-// g++ -pipe -lpthread -o parallel.exe tsp_parallel.cpp ; ./parallel.exe 5
+// g++ -lpthread -o parallel.exe tsp_parallel.cpp ; ./parallel.exe 5
 
 #include <iostream>
 #include <stdlib.h>
@@ -41,24 +41,24 @@ class Path
 
   // Array city[] is a permutation of all cities.
   // city[0]..city[numVisited-1] is the current partial path;
-  // city[numVisited]..city[numCities-1] are the cities not yet in the path 
+  // city[numVisited]..city[numCities-1] are the cities not yet in the path
 
   Path(int n): length(0), numVisited(1), numCities(n)			// Initialize a Path with city 0 as visited
-  { 
-    for (int i = 0; i < numCities; i++) 
+  {
+    for (int i = 0; i < numCities; i++)
       city[i] = i;
   }
   Path (const Path& other) : numVisited(other.numVisited), length(other.length), numCities(other.numCities)
   {
-    for (int i = 0; i < numCities; i++) 
+    for (int i = 0; i < numCities; i++)
       city[i] = other.city[i];
   }
 
-  void AddCity (int i)		// Extends path by adding the ith city not yet visited. 
+  void AddCity (int i)		// Extends path by adding the ith city not yet visited.
   {
     assert(numVisited <= i && i < numCities);
     // In order to keep the path as a permutation of all cities
-    // we "add" a city on the path by swapping 
+    // we "add" a city on the path by swapping
     std::swap(city[i], city[numVisited]);
 
     // visit city[numVisited]
@@ -68,7 +68,7 @@ class Path
 
   void Print()
   {
-    for (int i = 0; i < numVisited; i++) 
+    for (int i = 0; i < numVisited; i++)
       std::cout << ' ' << city[i];
     std::cout << "; length = " << length << std::endl;
   }
@@ -88,9 +88,9 @@ class Queue
   int isEmpty() { return size==0; };
 };
 
-void Queue::Put(Path *P) 
+void Queue::Put(Path *P)
 {
-  assert(size < MAXQSIZE); 
+  assert(size < MAXQSIZE);
   path[size++] = P;
 }
 
@@ -100,7 +100,7 @@ Path *Queue::Get()
     return NULL;
 
   // to decrease the size of the queue, move the last element
-  Path *p = path[0]; 
+  Path *p = path[0];
   path[0] = path[--size];
 
   return p;
@@ -140,7 +140,7 @@ struct Params
 
 
 void* tsp (void* arg)
-{ 
+{
   Params *params = (Params *)arg;
   int numCities = params->numCities;
   Queue *Q = params->Q;
@@ -148,13 +148,13 @@ void* tsp (void* arg)
 
   // For every partial path in the queue, extend the partial path with all
   // of the unvisited cities (one by one) and add these newly formed partial
-  // paths back to the queue  
-  while (!Q->isEmpty()) 
+  // paths back to the queue
+  while (!Q->isEmpty())
   {
-    Path *p = Q->Get(); 
+    Path *p = Q->Get();
 
     // For each city not yet visited, extend the path:
-    for (int i = p->numVisited; i < numCities; i++) 
+    for (int i = p->numVisited; i < numCities; i++)
     {
       Path *p1 = new Path(*p);	// initially p1 is a clone of p
       p1->AddCity(i);
@@ -170,10 +170,10 @@ void* tsp (void* arg)
           std::lock_guard<std::mutex> guard(g_shortestPathMutex);
           *shortestPath = *p1;
         }
-       
+
         delete p1;
-      } 
-      else 
+      }
+      else
       {
         if (p1->length > shortestPath->length)
         {
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
 
   Fill_Dist(NumCities);			// initialize Distance matrix
 
-  // thread details 
+  // thread details
   int numberOfThreads = std::min(MAX_THREADS, NumCities - 1);
   pthread_t threads[numberOfThreads];
   Path shortestPath = Path(NumCities);
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
       queues[i].Put(P);
     }
 
-    shortestPath.length = INT_MAX; 
+    shortestPath.length = INT_MAX;
 
     params[i] = {NumCities, &queues[i], &shortestPath};
 
@@ -231,11 +231,11 @@ int main(int argc, char *argv[])
         exit(-1);
     }
   }
-  
+
   for (int i = 0; i < numberOfThreads; i++) {
     pthread_join(threads[i], NULL);
   }
-  
+
   auto endTime = std::chrono::steady_clock::now();
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
