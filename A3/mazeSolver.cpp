@@ -54,7 +54,7 @@ struct maze
 {
 	int rows;
 	int cols;
-	char matrix[14001][14001];
+	char **matrix;
 };
 
 maze myMaze;
@@ -245,6 +245,13 @@ int main(int argc, char *argv[])
 	in >> myMaze.cols;
 	cout << "Reading a " << myMaze.rows << " by " << myMaze.cols << " matrix." << endl;
 
+	// allocate 2D maze array
+	myMaze.matrix = new char *[myMaze.rows];
+	for (int i = 0; i < myMaze.rows; i++)
+	{
+		myMaze.matrix[i] = new char[myMaze.cols];
+	}
+
 	//Burn the end of line character
 	in.ignore(200, '\n');
 	for (int i = 0; i < myMaze.rows; i++)
@@ -258,9 +265,9 @@ int main(int argc, char *argv[])
 	}
 
 	// Print the empty maze ------ Comment below for big maze sizes
-	// for(int i=0; i<myMaze.rows; i++)
+	// for (int i = 0; i < myMaze.rows; i++)
 	// {
-	// 	for(int j=0; j<myMaze.cols; j++)
+	// 	for (int j = 0; j < myMaze.cols; j++)
 	// 		cout << myMaze.matrix[i][j];
 	// 	cout << endl;
 	// }
@@ -284,15 +291,25 @@ int main(int argc, char *argv[])
 	auto startTimeBf = std::chrono::steady_clock::now();
 	int bfDistance = bruteForceMazeSolver(x, y);
 	auto endTimeBf = std::chrono::steady_clock::now();
- 	auto usBf = std::chrono::duration_cast<std::chrono::microseconds>(endTimeBf - startTimeBf);
+	auto usBf = std::chrono::duration_cast<std::chrono::microseconds>(endTimeBf - startTimeBf);
 
 	//Print Maze ------ Comment below for big maze sizes
-	// for(int i=0; i<myMaze.rows; i++)
+	// for (int i = 0; i < myMaze.rows; i++)
 	// {
-	// 	for(int j=0; j<myMaze.cols; j++)
+	// 	for (int j = 0; j < myMaze.cols; j++)
 	// 		cout << myMaze.matrix[i][j];
 	// 	cout << endl;
 	// }
+
+	// delete allocated dynamic maze array
+	if (myMaze.matrix != nullptr)
+	{
+		for (int i = 0; i < myMaze.rows; i++)
+		{
+			delete[] myMaze.matrix[i];
+		}
+		delete[] myMaze.matrix;
+	}
 
 	cout << "========== Summary ==========" << endl;
 	cout << "Brute Force:" << endl;
