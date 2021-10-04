@@ -26,7 +26,7 @@
 #include <algorithm>
 
 const int MAXCITIES = 20;
-const int MAX_THREADS = 6;
+const int MAX_THREADS = 4;
 std::mutex g_shortestPathMutex;
 
 int **Dist;     // Dist[i][j] =  distance from  i to j
