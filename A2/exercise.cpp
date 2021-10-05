@@ -87,6 +87,18 @@ void parallelSolution_4(int *A)
     }
 }
 
+void parallelSolution_5(int *A)
+{
+    int idx;
+    #pragma omp parallel for schedule(dynamic) private(idx)
+    for (int i = 1; i < ITER; ++i) {
+        idx = i * STRIDE;
+        for (int n = 0; n < STRIDE; ++n) {
+            A[idx + n] = transform(A[n]);
+        }
+    }
+}
+
 
 
 int main()
