@@ -56,7 +56,7 @@ void parallelSolution_1(int *A)
 // similar to solution 1, except indexing i at 0
 void parallelSolution_2(int *A)
 {
-    for (int i = 0; i < ITER; ++i) {
+    for (int i = 0; i < ITER-1; ++i) {
         #pragma omp parallel for 
         for (int n = i * STRIDE; n < (i+1) * STRIDE; ++n) {
             A[n + STRIDE] = transform(A[n]);
@@ -69,7 +69,7 @@ void parallelSolution_3(int *A)
 {
     #pragma omp parallel for
     for (int i = 0; i < STRIDE; i++) {
-        for (int n = 0; n < ITER; n++) {
+        for (int n = 0; n < ITER-1; n++) {
             A[i + (n+1)*STRIDE] = transform(A[i + n*STRIDE]);
         }
     }
@@ -98,8 +98,6 @@ void parallelSolution_5(int *A)
         }
     }
 }
-
-
 
 int main()
 {
