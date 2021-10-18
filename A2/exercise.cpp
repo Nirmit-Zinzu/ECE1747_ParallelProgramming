@@ -108,9 +108,9 @@ int main()
     // sequentialSolution(A);
     
     // parallelSolution_1(A);  // Shwetha's solution
-    // parallelSolution_2(A);  // similar to solution 1, except indexing i at 0
-    // parallelSolution_3(A);  // Cache locality issue -- worse than sequential
-    parallelSolution_4(A);  // Transformation
+    // parallelSolution_2(A);  // Cache locality issue -- worse than sequential
+    // parallelSolution_3(A);  // Good Cache locality  
+    parallelSolution_4(A);  // Good Cache locality with dynamic scheduling 
 
     // call your parallel solution here
     end_time = getElapsedTime();
