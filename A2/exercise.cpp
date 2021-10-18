@@ -43,7 +43,6 @@ void wrongSolution(int *A)
         A[n] = transform(A[n - STRIDE]);
 }
 
-// Shwetha's solution
 void parallelSolution_1(int *A)
 {
     for (int i = 1; i < ITER; ++i)
@@ -53,19 +52,8 @@ void parallelSolution_1(int *A)
             A[n] = transform(A[n - STRIDE]);
 }
 
-// similar to solution 1, except indexing i at 0
-void parallelSolution_2(int *A)
-{
-    for (int i = 0; i < ITER-1; ++i) {
-        #pragma omp parallel for 
-        for (int n = i * STRIDE; n < (i+1) * STRIDE; ++n) {
-            A[n + STRIDE] = transform(A[n]);
-        }
-    }
-}
-
 // Cache locality issue -- worse than sequential
-void parallelSolution_3(int *A)
+void parallelSolution_2(int *A)
 {
     #pragma omp parallel for
     for (int i = 0; i < STRIDE; i++) {
@@ -76,7 +64,7 @@ void parallelSolution_3(int *A)
 }
 
 // Transformation 
-void parallelSolution_4(int *A)
+void parallelSolution_3(int *A)
 {
     #pragma omp parallel for 
     for (int i = 1; i < ITER; ++i) {
@@ -87,7 +75,7 @@ void parallelSolution_4(int *A)
     }
 }
 
-void parallelSolution_5(int *A)
+void parallelSolution_4(int *A)
 {
     int idx;
     #pragma omp parallel for schedule(dynamic,16) private(idx) num_threads(4) 
