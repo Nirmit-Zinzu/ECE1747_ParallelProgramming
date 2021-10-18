@@ -90,7 +90,7 @@ void parallelSolution_4(int *A)
 void parallelSolution_5(int *A)
 {
     int idx;
-    #pragma omp parallel for schedule(dynamic) private(idx)
+    #pragma omp parallel for schedule(dynamic,16) private(idx) num_threads(4) 
     for (int i = 1; i < ITER; ++i) {
         idx = i * STRIDE;
         for (int n = 0; n < STRIDE; ++n) {
